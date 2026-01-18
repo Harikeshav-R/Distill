@@ -151,7 +151,7 @@ class PromptCompressor:
             dynamic_context_compression_ratio: float = 0.0,
             condition_compare: bool = False,
             add_instruction: bool = False,
-            rank_method: str = "llmlingua",
+            rank_method: str = "distill",
             concate_question: bool = True,
             strict_preserve_uncompressed: bool = True,
     ):
@@ -164,14 +164,14 @@ class PromptCompressor:
         if isinstance(context, str):
             context = [context]
         assert not (
-                rank_method == "longllmlingua" and not question
-        ), "In the LongLLMLingua, it is necessary to set a question."
+                rank_method == "longdistill" and not question
+        ), "In the Longdistill, it is necessary to set a question."
         if condition_compare and "_condition" not in condition_in_question:
             condition_in_question += "_condition"
-        if rank_method == "longllmlingua":
+        if rank_method == "longdistill":
             if condition_in_question == "none":
                 condition_in_question = "after"
-        elif rank_method == "llmlingua":
+        elif rank_method == "distill":
             condition_in_question = (
                 "none"
                 if "_condition" not in condition_in_question
@@ -412,7 +412,7 @@ class PromptCompressor:
             condition_in_question: str = "none",
             reorder_context: str = "original",
             dynamic_context_compression_ratio: float = 0.0,
-            rank_method: str = "longllmlingua",
+            rank_method: str = "longdistill",
             context_budget: str = "+100",
             strict_preserve_uncompressed: bool = True,
     ):
@@ -475,7 +475,7 @@ class PromptCompressor:
             token_budget_ratio: float = 1.4,
             question: str = "",
             condition_in_question: str = "none",
-            rank_method: str = "longllmlingua",
+            rank_method: str = "longdistill",
     ):
         def keep_sentence(dem_idx: int, sent_keep: int):
             idxs = sorted(dem_g[dem_idx], key=lambda x: sentence_ppl[x])[:sent_keep]
@@ -517,7 +517,7 @@ class PromptCompressor:
         if len(sentence_tokens_length) == 1:
             segments_info = []
             return context, segments_info
-        if rank_method == "longllmlingua":
+        if rank_method == "longdistill":
             sentence_ppl = [
                 self.get_condition_ppl(sentence, question, condition_in_question)
                 .cpu()
@@ -989,7 +989,7 @@ class PromptCompressor:
             condition_in_question: str,
             context_tokens_length: list,
     ):
-        def get_distance_longllmlingua(corpus, query):
+        def get_distance_longdistill(corpus, query):
             context_ppl = [
                 self.get_condition_ppl(
                     d,
@@ -1004,4 +1004,4 @@ class PromptCompressor:
             ys = sorted(enumerate(context_ppl), key=lambda x: sort_direct * x[1])
             return ys
 
-        return get_distance_longllmlingua(context, question)
+        return get_distance_longdistill(context, question)
