@@ -1,18 +1,717 @@
-
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Distill - LLM Input Compression Dashboard</title>
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💧</text></svg>" />
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/src/input.css">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Distill | Compress AI Prompts by 70% | Free Chrome Extension</title>
+  <meta name="description" content="Distill compresses your ChatGPT and Claude prompts by up to 70% using on-device ML. Double your free-tier message limits. No data leaves your browser.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* === RESET & BASE === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #050505; color: #ffffff; min-height: 100vh;
+      overflow-x: hidden; line-height: 1.5;
+    }
+
+    /* === SCROLLBAR === */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #050505; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+    /* === LOGO (sharper drops) === */
+    .logo-drops { display: flex; align-items: flex-end; gap: 2px; }
+    .drop {
+      border-radius: 4px 4px 50% 50% / 30% 30% 50% 50%;
+      transform: rotate(180deg);
+    }
+    .drop1 { width: 11px; height: 16px; background: #4A9EFF; }
+    .drop2 { width: 9px; height: 13px; background: #2B7BE0; margin-bottom: -1px; }
+
+    /* Nav logo drops slightly smaller */
+    .nav-logo .drop1 { width: 10px; height: 14px; }
+    .nav-logo .drop2 { width: 8px; height: 12px; }
+
+    /* === NAV === */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 64px;
+      border-bottom: 0.5px solid rgba(255,255,255,0.08);
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(5,5,5,0.85);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 17px; font-weight: 500; color: #fff; text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 32px; }
+    .nav-links a {
+      font-size: 13px; color: rgba(255,255,255,0.45);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: #fff; }
+    .nav-cta {
+      background: #fff; color: #000; font-size: 13px; font-weight: 500;
+      padding: 8px 20px; border-radius: 20px; border: none; cursor: pointer;
+      transition: opacity 0.2s; text-decoration: none; display: inline-block; line-height: 1.4;
+    }
+    .nav-cta:hover { opacity: 0.85; }
+    .nav-cta:active { transform: scale(0.98); }
+
+    /* Mobile menu button */
+    .mobile-menu-btn {
+      display: none; background: none; border: none; cursor: pointer;
+      width: 32px; height: 32px; flex-direction: column;
+      align-items: center; justify-content: center; gap: 5px;
+    }
+    .mobile-menu-btn span {
+      display: block; width: 18px; height: 1.5px;
+      background: rgba(255,255,255,0.6); border-radius: 1px;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .mobile-menu-btn.active span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .mobile-menu-btn.active span:nth-child(2) { opacity: 0; }
+    .mobile-menu-btn.active span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+    .mobile-nav {
+      display: none; position: fixed; top: 64px; left: 0; right: 0;
+      background: rgba(5,5,5,0.97); backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 0.5px solid rgba(255,255,255,0.08);
+      padding: 16px 24px 24px; z-index: 99;
+      flex-direction: column; gap: 4px;
+      transform: translateY(-10px); opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .mobile-nav.open { display: flex; transform: translateY(0); opacity: 1; }
+    .mobile-nav a {
+      font-size: 15px; color: rgba(255,255,255,0.5); text-decoration: none;
+      padding: 12px 0; border-bottom: 0.5px solid rgba(255,255,255,0.06);
+      transition: color 0.2s;
+    }
+    .mobile-nav a:last-child { border-bottom: none; }
+    .mobile-nav a:hover { color: #fff; }
+
+    /* === HERO === */
+    .hero { padding: 100px 48px 0; max-width: 1100px; margin: 0 auto; text-align: center; }
+
+    .hero-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(74,158,255,0.08); border: 0.5px solid rgba(74,158,255,0.25);
+      border-radius: 20px; padding: 6px 16px; font-size: 12px; color: #4A9EFF;
+      margin-bottom: 36px;
+    }
+    .badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #4A9EFF; animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.25; } }
+
+    .hero h1 {
+      font-size: clamp(38px, 6vw, 72px); font-weight: 500; line-height: 1.05;
+      letter-spacing: -2px; color: #fff; margin-bottom: 24px;
+    }
+    .hero h1 .accent { color: #4A9EFF; }
+
+    .hero-sub {
+      font-size: 16px; color: rgba(255,255,255,0.45); max-width: 480px;
+      margin: 0 auto 40px; line-height: 1.7; font-weight: 400;
+    }
+
+    .hero-actions {
+      display: flex; gap: 12px; justify-content: center;
+      flex-wrap: wrap; margin-bottom: 72px;
+    }
+
+    .btn-primary {
+      background: #4A9EFF; color: #fff; border: none;
+      padding: 13px 28px; border-radius: 24px; font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: opacity 0.2s; font-family: inherit;
+      text-decoration: none; display: inline-block; line-height: 1.4;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-ghost {
+      background: transparent; color: rgba(255,255,255,0.55);
+      border: 0.5px solid rgba(255,255,255,0.15);
+      padding: 13px 28px; border-radius: 24px; font-size: 14px;
+      cursor: pointer; transition: border-color 0.2s, color 0.2s; font-family: inherit;
+      text-decoration: none; display: inline-block; line-height: 1.4;
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.35); color: #fff; }
+    .btn-ghost:active { transform: scale(0.98); }
+
+    /* === STATS ROW === */
+    .stats {
+      display: grid; grid-template-columns: repeat(4, 1fr);
+      border: 0.5px solid rgba(255,255,255,0.08); border-radius: 16px;
+      overflow: hidden; max-width: 620px; margin: 0 auto 0;
+    }
+    .stat {
+      padding: 24px 20px; text-align: center;
+      border-right: 0.5px solid rgba(255,255,255,0.08);
+    }
+    .stat:last-child { border-right: none; }
+    .stat-num { font-size: 28px; font-weight: 500; color: #fff; letter-spacing: -0.5px; }
+    .stat-num .blue { color: #4A9EFF; }
+    .stat-lbl {
+      font-size: 11px; color: rgba(255,255,255,0.3); margin-top: 4px;
+      letter-spacing: 0.5px; text-transform: uppercase;
+    }
+
+    /* === SECTION COMMON === */
+    .section-label {
+      font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 14px;
+    }
+    .section-title { font-size: 30px; font-weight: 500; letter-spacing: -1px; margin-bottom: 10px; }
+    .section-sub {
+      font-size: 14px; color: rgba(255,255,255,0.4); margin-bottom: 40px;
+      line-height: 1.7; max-width: 560px;
+    }
+
+    /* === COMPRESSION DEMO === */
+    .demo-section { max-width: 820px; margin: 0 auto; padding: 120px 48px 0; }
+    .demo-card {
+      background: #0d0d0d; border: 0.5px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 28px;
+    }
+
+    .slider-row { display: flex; align-items: center; gap: 16px; margin-bottom: 24px; }
+    .slider-label { font-size: 12px; color: rgba(255,255,255,0.4); white-space: nowrap; }
+    .slider-val { font-size: 13px; color: #4A9EFF; font-weight: 500; min-width: 40px; text-align: right; }
+
+    /* Range slider styling */
+    input[type="range"] { flex: 1; -webkit-appearance: none; background: transparent; cursor: pointer; }
+    input[type="range"]::-webkit-slider-runnable-track {
+      height: 4px; border-radius: 2px;
+      background: linear-gradient(to right, #4A9EFF var(--slider-pct, 0%), rgba(255,255,255,0.08) var(--slider-pct, 0%));
+    }
+    input[type="range"]::-moz-range-track { height: 4px; border-radius: 2px; background: rgba(255,255,255,0.08); }
+    input[type="range"]::-moz-range-progress { height: 4px; border-radius: 2px; background: #4A9EFF; }
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none; width: 16px; height: 16px; border-radius: 50%;
+      background: #4A9EFF; border: 2px solid #050505; margin-top: -6px;
+      box-shadow: 0 0 0 3px rgba(74,158,255,0.15);
+      transition: box-shadow 0.2s;
+    }
+    input[type="range"]::-moz-range-thumb {
+      width: 16px; height: 16px; border-radius: 50%;
+      background: #4A9EFF; border: 2px solid #050505;
+      box-shadow: 0 0 0 3px rgba(74,158,255,0.15);
+    }
+    input[type="range"]:hover::-webkit-slider-thumb { box-shadow: 0 0 0 5px rgba(74,158,255,0.2); }
+
+    .tokens-wrap {
+      font-family: 'SF Mono', 'Fira Code', 'Courier New', monospace;
+      font-size: 13px; line-height: 2.2;
+      background: #080808; border-radius: 10px; padding: 20px 22px;
+      border: 0.5px solid rgba(255,255,255,0.06); min-height: 120px;
+    }
+    .tok {
+      display: inline; padding: 2px 4px; border-radius: 3px; margin: 0 1px;
+      transition: all 0.4s ease;
+    }
+    .tok.kept { color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.05); }
+    .tok.removed {
+      color: rgba(255,255,255,0.08); background: transparent;
+      text-decoration: line-through; text-decoration-color: rgba(255,255,255,0.06);
+    }
+    .tok.entity { color: rgba(255,255,255,0.8); background: rgba(255,255,255,0.05); }
+
+    .demo-meta {
+      display: flex; justify-content: space-between; margin-top: 20px;
+      font-size: 12px; color: rgba(255,255,255,0.25); padding: 0 4px;
+    }
+    .demo-meta .val { color: #4A9EFF; font-weight: 500; }
+
+    /* === HOW IT WORKS === */
+    .how-section { max-width: 900px; margin: 0 auto; padding: 120px 48px 0; }
+    .steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    .step-card {
+      background: #0d0d0d; border: 0.5px solid rgba(255,255,255,0.08);
+      border-radius: 14px; padding: 28px 24px;
+      transition: border-color 0.3s;
+    }
+    .step-card:hover { border-color: rgba(74,158,255,0.15); }
+    .step-num { font-size: 11px; color: rgba(255,255,255,0.15); letter-spacing: 1px; margin-bottom: 16px; }
+    .step-icon {
+      width: 36px; height: 36px; border-radius: 10px;
+      background: rgba(74,158,255,0.08); border: 0.5px solid rgba(74,158,255,0.2);
+      display: flex; align-items: center; justify-content: center; margin-bottom: 16px;
+    }
+    .step-icon svg {
+      width: 16px; height: 16px; stroke: #4A9EFF; fill: none;
+      stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round;
+    }
+    .step-title { font-size: 14px; font-weight: 500; margin-bottom: 8px; color: #fff; }
+    .step-desc { font-size: 12px; color: rgba(255,255,255,0.35); line-height: 1.7; }
+
+    /* === COMPARISON TABLE === */
+    .compare-section { max-width: 820px; margin: 0 auto; padding: 120px 48px 0; }
+    .compare-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+    .compare-table thead th {
+      text-align: left; padding: 14px 20px;
+      border-bottom: 0.5px solid rgba(255,255,255,0.08);
+      color: rgba(255,255,255,0.25); font-weight: 400; font-size: 11px;
+      letter-spacing: 1.5px; text-transform: uppercase;
+    }
+    .compare-table tbody td {
+      padding: 16px 20px; border-bottom: 0.5px solid rgba(255,255,255,0.04);
+      color: rgba(255,255,255,0.5); font-size: 13px;
+    }
+    .compare-table tbody td:first-child { color: rgba(255,255,255,0.75); font-weight: 400; }
+    .compare-table .yes { color: #4A9EFF !important; font-weight: 500; }
+    .compare-table .no { color: rgba(255,255,255,0.18) !important; }
+    .compare-table .highlight-row td { background: rgba(74,158,255,0.04); }
+
+
+
+    /* === FINAL CTA === */
+    .cta-section {
+      text-align: center; padding: 120px 48px 100px;
+      border-top: 0.5px solid rgba(255,255,255,0.06); margin-top: 120px;
+    }
+    .cta-section h2 {
+      font-size: clamp(32px, 5vw, 44px); font-weight: 500; letter-spacing: -1px;
+      margin-bottom: 18px; line-height: 1.15;
+    }
+    .cta-section .cta-sub {
+      font-size: 15px; color: rgba(255,255,255,0.35); margin-bottom: 36px;
+      line-height: 1.6;
+    }
+    .btn-primary-lg {
+      background: #4A9EFF; color: #fff; border: none;
+      padding: 15px 32px; border-radius: 24px; font-size: 15px; font-weight: 500;
+      cursor: pointer; transition: opacity 0.2s; font-family: inherit;
+      text-decoration: none; display: inline-block;
+    }
+    .btn-primary-lg:hover { opacity: 0.85; }
+    .btn-primary-lg:active { transform: scale(0.98); }
+
+    .chrome-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(255,255,255,0.03); border: 0.5px solid rgba(255,255,255,0.08);
+      border-radius: 10px; padding: 10px 18px; font-size: 13px;
+      color: rgba(255,255,255,0.4); margin-top: 20px;
+    }
+    .chrome-badge svg { opacity: 0.5; }
+
+    /* === FOOTER === */
+    footer {
+      border-top: 0.5px solid rgba(255,255,255,0.06);
+      padding: 28px 48px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-left {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 14px; color: rgba(255,255,255,0.25);
+    }
+    .footer-left .drop1 { width: 8px; height: 11px; }
+    .footer-left .drop2 { width: 6px; height: 9px; }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a {
+      font-size: 12px; color: rgba(255,255,255,0.2); text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: rgba(255,255,255,0.5); }
+
+    /* === SCROLL ANIMATIONS === */
+    .fade-in {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+      nav { padding: 0 24px; height: 56px; }
+      .nav-links { display: none; }
+      .mobile-menu-btn { display: flex; }
+      .mobile-nav { top: 56px; }
+      .hero { padding: 72px 24px 0; }
+      .hero h1 { letter-spacing: -1px; }
+      .hero-sub { font-size: 15px; }
+      .hero-actions { flex-direction: column; align-items: center; }
+      .hero-actions .btn-primary,
+      .hero-actions .btn-ghost { width: 100%; max-width: 280px; text-align: center; }
+      .stats { grid-template-columns: repeat(2, 1fr); max-width: 340px; }
+      .stat { border-bottom: 0.5px solid rgba(255,255,255,0.08); }
+      .stat:nth-child(odd) { border-right: 0.5px solid rgba(255,255,255,0.08); }
+      .stat:nth-child(even) { border-right: none; }
+      .stat:nth-last-child(-n+2) { border-bottom: none; }
+      .demo-section, .how-section, .compare-section { padding-left: 24px; padding-right: 24px; }
+      .demo-section, .how-section, .compare-section { padding-top: 80px; }
+      .steps { grid-template-columns: 1fr; }
+
+      .compare-table { font-size: 12px; }
+      .compare-table thead th, .compare-table tbody td { padding: 12px 12px; }
+      .cta-section { padding: 80px 24px 72px; margin-top: 80px; }
+      .cta-section h2 { font-size: 30px; }
+      footer { padding: 24px; }
+      .section-title { font-size: 24px; }
+    }
+
+    @media (max-width: 480px) {
+      .stat-num { font-size: 22px; }
+      .stat { padding: 18px 12px; }
+      .demo-card { padding: 20px; }
+      .tokens-wrap { padding: 16px; font-size: 12px; }
+      .demo-meta { flex-direction: column; gap: 4px; }
+
+    }
+  </style>
 </head>
-  <body class="bg-[#F9FAFB]">
-    <div id="root"></div>
-    <script type="module" src="/index.tsx"></script>
-  </body>
+
+<body>
+  <!-- === NAVIGATION === -->
+  <nav id="main-nav">
+    <a href="index.html" class="nav-logo" id="nav-home-logo">
+      <div class="logo-drops">
+        <div class="drop drop1"></div>
+        <div class="drop drop2"></div>
+      </div>
+      Distill
+    </a>
+    <div class="nav-links">
+      <a href="#how-it-works">How it works</a>
+      <a href="#features">Features</a>
+      <a href="pricing.html">Pricing</a>
+      <a href="demo.html">Demo</a>
+    </div>
+    <button class="mobile-menu-btn" id="mobile-menu-toggle" aria-label="Toggle navigation menu">
+      <span></span><span></span><span></span>
+    </button>
+    <button class="nav-cta" id="nav-add-chrome">Add to Chrome</button>
+  </nav>
+
+  <!-- Mobile navigation overlay -->
+  <div class="mobile-nav" id="mobile-nav">
+    <a href="#how-it-works">How it works</a>
+    <a href="#features">Features</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="demo.html">Demo</a>
+  </div>
+
+  <!-- === HERO === -->
+  <section class="hero" id="hero">
+    <div class="hero-badge">
+      <div class="badge-dot"></div>
+      Now in beta · Free forever
+    </div>
+    <h1>Talk more.<br>Hit limits <span class="accent">never</span>.</h1>
+    <p class="hero-sub">Distill compresses your AI prompts by up to 70%, invisibly, instantly, locally. More messages. Faster responses. Zero configuration.</p>
+    <div class="hero-actions">
+      <button class="btn-primary" id="hero-cta-primary">Add to Chrome, it's free</button>
+      <button class="btn-ghost" id="hero-cta-ghost">See how it works</button>
+    </div>
+
+    <div class="stats">
+      <div class="stat">
+        <div class="stat-num"><span class="blue">50%</span></div>
+        <div class="stat-lbl">Avg compression</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num"><span class="blue">2x</span></div>
+        <div class="stat-lbl">Message limits</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num"><span class="blue">82%</span></div>
+        <div class="stat-lbl">Faster responses</div>
+      </div>
+      <div class="stat">
+        <div class="stat-num"><span class="blue">95%</span></div>
+        <div class="stat-lbl">Accuracy retained</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- === INTERACTIVE COMPRESSION DEMO === -->
+  <section class="demo-section fade-in" id="demo">
+    <div class="section-label">Live demo</div>
+    <h2 class="section-title">Watch compression happen</h2>
+    <p class="section-sub">Drag the slider to see how Distill strips filler tokens while anchoring meaning. Entities like names, dates, and numbers are always preserved.</p>
+
+    <div class="demo-card">
+      <div class="slider-row">
+        <span class="slider-label">Compression level</span>
+        <input type="range" id="comp-slider" min="0" max="100" value="0" step="1" aria-label="Compression level">
+        <span class="slider-val" id="slider-pct">0%</span>
+      </div>
+      <div class="tokens-wrap" id="token-display" role="region" aria-live="polite" aria-label="Token compression visualization"></div>
+      <div class="demo-meta">
+        <div>Original: <span class="val" id="orig-count">0</span> tokens</div>
+        <div>Compressed: <span class="val" id="comp-count">0</span> tokens</div>
+        <div>Saved: <span class="val" id="saved-pct">0</span>%</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- === HOW IT WORKS === -->
+  <section class="how-section fade-in" id="how-it-works">
+    <div class="section-label">Architecture</div>
+    <h2 class="section-title">Dual-stream intelligence</h2>
+    <p class="section-sub">Two models run in parallel in your browser. No data ever leaves your device.</p>
+
+    <div class="steps">
+      <div class="step-card" id="step-importance">
+        <div class="step-num">01</div>
+        <div class="step-icon">
+          <svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5"/><path d="M8 5v3l2.5 1.5"/></svg>
+        </div>
+        <div class="step-title">Importance scoring</div>
+        <div class="step-desc">A Llama-3.2 transformer runs a single forward pass, assigning every token an importance probability from 0 to 1.</div>
+      </div>
+      <div class="step-card" id="step-entity">
+        <div class="step-num">02</div>
+        <div class="step-icon">
+          <svg viewBox="0 0 16 16"><rect x="2" y="4" width="12" height="2.5" rx="1"/><rect x="2" y="8" width="8" height="2.5" rx="1"/><circle cx="13" cy="9.25" r="1.5"/></svg>
+        </div>
+        <div class="step-title">Entity anchoring</div>
+        <div class="step-desc">A parallel BERT model identifies critical entities (names, dates, numbers, technical terms) and forces 100% retention.</div>
+      </div>
+      <div class="step-card" id="step-pruning">
+        <div class="step-num">03</div>
+        <div class="step-icon">
+          <svg viewBox="0 0 16 16"><path d="M3 8h10"/><path d="M6 5l-3 3 3 3"/><path d="M10 5l3 3-3 3"/></svg>
+        </div>
+        <div class="step-title">Strategic pruning</div>
+        <div class="step-desc">Tokens below your threshold are removed. Union-of-masks fusion ensures no hallucinations. Under 200ms total overhead.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- === COMPARISON TABLE === -->
+  <section class="compare-section fade-in" id="comparison">
+    <div class="section-label">Comparison</div>
+    <h2 class="section-title">Why Distill?</h2>
+    <p class="section-sub">The only consumer-grade prompt compression. No API keys, no setup, no data leaving your browser.</p>
+
+    <table class="compare-table" id="features">
+      <thead>
+        <tr>
+          <th>Feature</th>
+          <th>Distill</th>
+          <th>LLMLingua</th>
+          <th>Just waiting</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr class="highlight-row">
+          <td>No API key needed</td>
+          <td class="yes">&#10003;</td>
+          <td class="no">&#10007;</td>
+          <td class="no">&#10007;</td>
+        </tr>
+        <tr>
+          <td>Runs in browser (local)</td>
+          <td class="yes">&#10003;</td>
+          <td class="no">&#10007;</td>
+          <td class="no">N/A</td>
+        </tr>
+        <tr class="highlight-row">
+          <td>Works on ChatGPT + Claude</td>
+          <td class="yes">&#10003;</td>
+          <td class="no">Dev only</td>
+          <td class="no">N/A</td>
+        </tr>
+        <tr>
+          <td>Entity-anchored accuracy</td>
+          <td class="yes">95.7%</td>
+          <td class="yes">~90%</td>
+          <td class="no">100%</td>
+        </tr>
+        <tr class="highlight-row">
+          <td>Zero configuration</td>
+          <td class="yes">&#10003;</td>
+          <td class="no">&#10007;</td>
+          <td class="yes">&#10003;</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+
+  <!-- === FINAL CTA === -->
+  <section class="cta-section fade-in" id="cta">
+    <h2>Start sending more.<br>Pay nothing.</h2>
+    <p class="cta-sub">Install in 10 seconds. Works instantly on ChatGPT, Claude, Gemini, and Perplexity.</p>
+    <button class="btn-primary-lg" id="cta-add-chrome">Add to Chrome, Free</button>
+    <br>
+    <div class="chrome-badge">
+      <svg width="14" height="14" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="8" cy="8" r="6"/><circle cx="8" cy="8" r="2.5"/>
+      </svg>
+      Chrome Extension · No account required
+    </div>
+  </section>
+
+  <!-- === FOOTER === -->
+  <footer>
+    <div class="footer-left">
+      <div class="logo-drops">
+        <div class="drop drop1"></div>
+        <div class="drop drop2"></div>
+      </div>
+      Distill
+    </div>
+    <div class="footer-links">
+      <a href="#" id="footer-privacy">Privacy</a>
+      <a href="#" id="footer-github">GitHub</a>
+      <a href="#" id="footer-contact">Contact</a>
+    </div>
+  </footer>
+
+  <!-- === JAVASCRIPT === -->
+  <script>
+    /* == Token data == */
+    const tokens = [
+      { text: "I", entity: false },
+      { text: "need", entity: false },
+      { text: "you", entity: false },
+      { text: "to", entity: false },
+      { text: "please", entity: false },
+      { text: "help", entity: false },
+      { text: "me", entity: false },
+      { text: "write", entity: true },
+      { text: "a", entity: false },
+      { text: "detailed", entity: false },
+      { text: "summary", entity: true },
+      { text: "of", entity: false },
+      { text: "the", entity: false },
+      { text: "quarterly", entity: true },
+      { text: "earnings", entity: true },
+      { text: "report", entity: true },
+      { text: "for", entity: false },
+      { text: "Q3", entity: true },
+      { text: "2024", entity: true },
+      { text: "focusing", entity: false },
+      { text: "specifically", entity: false },
+      { text: "on", entity: false },
+      { text: "the", entity: false },
+      { text: "revenue", entity: true },
+      { text: "growth", entity: true },
+      { text: "in", entity: false },
+      { text: "the", entity: false },
+      { text: "Asia-Pacific", entity: true },
+      { text: "region", entity: true },
+      { text: "and", entity: false },
+      { text: "any", entity: false },
+      { text: "notable", entity: false },
+      { text: "challenges", entity: true },
+      { text: "that", entity: false },
+      { text: "were", entity: false },
+      { text: "mentioned", entity: false },
+      { text: "by", entity: false },
+      { text: "the", entity: false },
+      { text: "CEO", entity: true }
+    ];
+
+    /* Filler tokens removal priority (indices) */
+    const removePriority = [
+      4, 3, 6, 11, 12, 16, 21, 25, 29, 30, 31, 33, 34, 35, 36, 37,
+      0, 1, 2, 9, 19, 20, 22, 26, 5, 8
+    ];
+
+    const slider = document.getElementById('comp-slider');
+    const pctLabel = document.getElementById('slider-pct');
+    const display = document.getElementById('token-display');
+    const origEl = document.getElementById('orig-count');
+    const compEl = document.getElementById('comp-count');
+    const savedEl = document.getElementById('saved-pct');
+    const totalTokens = tokens.length;
+
+    function render(pct) {
+      const numToRemove = Math.floor((pct / 100) * removePriority.length);
+      const removed = new Set(removePriority.slice(0, numToRemove));
+      const compCount = totalTokens - removed.size;
+
+      let html = '';
+      tokens.forEach((t, i) => {
+        if (t.entity) {
+          html += `<span class="tok entity">${t.text}</span> `;
+        } else if (removed.has(i)) {
+          html += `<span class="tok removed">${t.text}</span> `;
+        } else {
+          html += `<span class="tok kept">${t.text}</span> `;
+        }
+      });
+
+      display.innerHTML = html;
+      origEl.textContent = totalTokens;
+      compEl.textContent = compCount;
+      savedEl.textContent = Math.round(((totalTokens - compCount) / totalTokens) * 100);
+    }
+
+    /* Slider live update */
+    slider.addEventListener('input', () => {
+      const v = parseInt(slider.value);
+      pctLabel.textContent = v + '%';
+      slider.style.setProperty('--slider-pct', v + '%');
+      render(v);
+    });
+
+    /* Initial render */
+    render(0);
+    slider.style.setProperty('--slider-pct', '0%');
+
+    /* == Scroll-triggered fade-in == */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('visible');
+        }
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+
+    /* == Smooth scroll for nav links == */
+    document.querySelectorAll('.nav-links a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const href = link.getAttribute('href');
+        if (href.startsWith('#')) {
+          e.preventDefault();
+          const target = document.querySelector(href);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+
+    /* == "See how it works" button == */
+    document.getElementById('hero-cta-ghost').addEventListener('click', () => {
+      document.getElementById('demo').scrollIntoView({ behavior: 'smooth' });
+    });
+
+    /* == Mobile menu toggle == */
+    const mobileToggle = document.getElementById('mobile-menu-toggle');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    mobileToggle.addEventListener('click', () => {
+      mobileToggle.classList.toggle('active');
+      mobileNav.classList.toggle('open');
+    });
+
+    /* Close mobile menu on link click */
+    document.querySelectorAll('.mobile-nav a').forEach(link => {
+      link.addEventListener('click', (e) => {
+        const href = link.getAttribute('href');
+        mobileToggle.classList.remove('active');
+        mobileNav.classList.remove('open');
+        if (href.startsWith('#')) {
+          e.preventDefault();
+          const target = document.querySelector(href);
+          if (target) target.scrollIntoView({ behavior: 'smooth' });
+        }
+      });
+    });
+  </script>
+</body>
 </html>

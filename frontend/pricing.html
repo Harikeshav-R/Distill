@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pricing | Distill</title>
+  <meta name="description" content="Distill pricing. Start free with full prompt compression, or upgrade to Pro for $50 one-time with usage analytics, extended models, and API access.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500&display=swap" rel="stylesheet">
+
+  <style>
+    /* === RESET & BASE === */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      background: #050505; color: #ffffff; min-height: 100vh;
+      overflow-x: hidden; line-height: 1.5;
+    }
+
+    /* === SCROLLBAR === */
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #050505; }
+    ::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+    /* === LOGO === */
+    .logo-drops { display: flex; align-items: flex-end; gap: 2px; }
+    .drop {
+      border-radius: 4px 4px 50% 50% / 30% 30% 50% 50%;
+      transform: rotate(180deg);
+    }
+    .drop1 { width: 11px; height: 16px; background: #4A9EFF; }
+    .drop2 { width: 9px; height: 13px; background: #2B7BE0; margin-bottom: -1px; }
+    .nav-logo .drop1 { width: 10px; height: 14px; }
+    .nav-logo .drop2 { width: 8px; height: 12px; }
+
+    /* === NAV === */
+    nav {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 48px; height: 64px;
+      border-bottom: 0.5px solid rgba(255,255,255,0.08);
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(5,5,5,0.85);
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    }
+    .nav-logo {
+      display: flex; align-items: center; gap: 10px;
+      font-size: 17px; font-weight: 500; color: #fff; text-decoration: none;
+    }
+    .nav-links { display: flex; gap: 32px; }
+    .nav-links a {
+      font-size: 13px; color: rgba(255,255,255,0.45);
+      text-decoration: none; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: #fff; }
+    .nav-links a.active { color: #fff; }
+    .nav-cta {
+      background: #fff; color: #000; font-size: 13px; font-weight: 500;
+      padding: 8px 20px; border-radius: 20px; border: none; cursor: pointer;
+      transition: opacity 0.2s; text-decoration: none; display: inline-block; line-height: 1.4;
+    }
+    .nav-cta:hover { opacity: 0.85; }
+    .nav-cta:active { transform: scale(0.98); }
+
+    /* Mobile menu button */
+    .mobile-menu-btn {
+      display: none; background: none; border: none; cursor: pointer;
+      width: 32px; height: 32px; flex-direction: column;
+      align-items: center; justify-content: center; gap: 5px;
+    }
+    .mobile-menu-btn span {
+      display: block; width: 18px; height: 1.5px;
+      background: rgba(255,255,255,0.6); border-radius: 1px;
+      transition: transform 0.3s, opacity 0.3s;
+    }
+    .mobile-menu-btn.active span:nth-child(1) { transform: translateY(6.5px) rotate(45deg); }
+    .mobile-menu-btn.active span:nth-child(2) { opacity: 0; }
+    .mobile-menu-btn.active span:nth-child(3) { transform: translateY(-6.5px) rotate(-45deg); }
+
+    .mobile-nav {
+      display: none; position: fixed; top: 64px; left: 0; right: 0;
+      background: rgba(5,5,5,0.97); backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border-bottom: 0.5px solid rgba(255,255,255,0.08);
+      padding: 16px 24px 24px; z-index: 99;
+      flex-direction: column; gap: 4px;
+      transform: translateY(-10px); opacity: 0;
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+    .mobile-nav.open { display: flex; transform: translateY(0); opacity: 1; }
+    .mobile-nav a {
+      font-size: 15px; color: rgba(255,255,255,0.5); text-decoration: none;
+      padding: 12px 0; border-bottom: 0.5px solid rgba(255,255,255,0.06);
+      transition: color 0.2s;
+    }
+    .mobile-nav a:last-child { border-bottom: none; }
+    .mobile-nav a:hover { color: #fff; }
+
+    /* === BUTTONS === */
+    .btn-primary {
+      background: #4A9EFF; color: #fff; border: none;
+      padding: 13px 28px; border-radius: 24px; font-size: 14px; font-weight: 500;
+      cursor: pointer; transition: opacity 0.2s; font-family: inherit;
+      text-decoration: none; display: inline-block; line-height: 1.4;
+    }
+    .btn-primary:hover { opacity: 0.85; }
+    .btn-primary:active { transform: scale(0.98); }
+
+    .btn-ghost {
+      background: transparent; color: rgba(255,255,255,0.55);
+      border: 0.5px solid rgba(255,255,255,0.15);
+      padding: 13px 28px; border-radius: 24px; font-size: 14px;
+      cursor: pointer; transition: border-color 0.2s, color 0.2s; font-family: inherit;
+      text-decoration: none; display: inline-block; line-height: 1.4;
+    }
+    .btn-ghost:hover { border-color: rgba(255,255,255,0.35); color: #fff; }
+    .btn-ghost:active { transform: scale(0.98); }
+
+    /* === SECTION COMMON === */
+    .section-label {
+      font-size: 11px; color: rgba(255,255,255,0.3); letter-spacing: 2px;
+      text-transform: uppercase; margin-bottom: 14px;
+    }
+    .section-title { font-size: 30px; font-weight: 500; letter-spacing: -1px; margin-bottom: 10px; }
+    .section-sub {
+      font-size: 14px; color: rgba(255,255,255,0.4); margin-bottom: 40px;
+      line-height: 1.7; max-width: 560px;
+    }
+
+    /* === PRICING PAGE HERO === */
+    .pricing-hero {
+      max-width: 900px; margin: 0 auto; padding: 80px 48px 0; text-align: center;
+    }
+    .pricing-hero .section-sub { margin-left: auto; margin-right: auto; }
+    .pricing-hero .section-title {
+      font-size: clamp(32px, 5vw, 48px); letter-spacing: -2px; margin-bottom: 14px;
+    }
+
+    /* === PRICING GRID === */
+    .pricing-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; max-width: 740px; margin: 0 auto; }
+
+    .pricing-card {
+      background: #0d0d0d; border: 0.5px solid rgba(255,255,255,0.08);
+      border-radius: 16px; padding: 36px 28px; text-align: left;
+      position: relative; transition: border-color 0.3s;
+    }
+    .pricing-card:hover { border-color: rgba(255,255,255,0.14); }
+    .pricing-card.featured {
+      border-color: rgba(74,158,255,0.3);
+      background: linear-gradient(180deg, rgba(74,158,255,0.04) 0%, #0d0d0d 100%);
+    }
+    .pricing-card.featured:hover { border-color: rgba(74,158,255,0.45); }
+
+    .pricing-badge {
+      display: inline-block; font-size: 10px; letter-spacing: 1.5px;
+      text-transform: uppercase; color: #4A9EFF;
+      background: rgba(74,158,255,0.1); border: 0.5px solid rgba(74,158,255,0.2);
+      border-radius: 20px; padding: 4px 12px; margin-bottom: 20px;
+    }
+
+    .pricing-tier { font-size: 18px; font-weight: 500; color: #fff; margin-bottom: 6px; }
+    .pricing-price { font-size: 40px; font-weight: 500; color: #fff; letter-spacing: -1px; margin-bottom: 4px; }
+    .pricing-price .period { font-size: 14px; color: rgba(255,255,255,0.3); font-weight: 400; letter-spacing: 0; }
+    .pricing-desc { font-size: 13px; color: rgba(255,255,255,0.35); margin-bottom: 28px; line-height: 1.6; }
+
+    .pricing-features { list-style: none; margin-bottom: 32px; }
+    .pricing-features li {
+      font-size: 13px; color: rgba(255,255,255,0.55); padding: 8px 0;
+      border-bottom: 0.5px solid rgba(255,255,255,0.04);
+      display: flex; align-items: center; gap: 10px;
+    }
+    .pricing-features li:last-child { border-bottom: none; }
+    .pricing-features .check {
+      width: 16px; height: 16px; border-radius: 50%; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .pricing-features .check svg { width: 10px; height: 10px; }
+    .pricing-features .check.blue { background: rgba(74,158,255,0.12); }
+    .pricing-features .check.blue svg { stroke: #4A9EFF; }
+    .pricing-features .check.muted { background: rgba(255,255,255,0.05); }
+    .pricing-features .check.muted svg { stroke: rgba(255,255,255,0.3); }
+
+    .pricing-card .btn-primary,
+    .pricing-card .btn-ghost {
+      width: 100%; text-align: center; display: block;
+    }
+
+    /* === FAQ SECTION === */
+    .faq-section {
+      max-width: 640px; margin: 0 auto; padding: 100px 48px 0;
+    }
+    .faq-section .section-title { text-align: center; }
+    .faq-section .section-label { text-align: center; }
+
+    .faq-item {
+      border-bottom: 0.5px solid rgba(255,255,255,0.06); padding: 20px 0;
+    }
+    .faq-item:last-child { border-bottom: none; }
+    .faq-q {
+      font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.8);
+      cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+      gap: 16px; user-select: none;
+    }
+    .faq-q .faq-icon {
+      font-size: 18px; color: rgba(255,255,255,0.2); transition: transform 0.3s, color 0.3s;
+      flex-shrink: 0;
+    }
+    .faq-item.open .faq-q .faq-icon { transform: rotate(45deg); color: #4A9EFF; }
+    .faq-a {
+      max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s ease;
+      font-size: 13px; color: rgba(255,255,255,0.35); line-height: 1.7;
+    }
+    .faq-item.open .faq-a { max-height: 200px; padding-top: 12px; }
+
+    /* === CTA BOTTOM === */
+    .cta-bottom {
+      text-align: center; padding: 100px 48px 80px;
+      border-top: 0.5px solid rgba(255,255,255,0.06); margin-top: 100px;
+    }
+    .cta-bottom h2 {
+      font-size: clamp(28px, 4vw, 36px); font-weight: 500; letter-spacing: -1px;
+      margin-bottom: 14px; line-height: 1.15;
+    }
+    .cta-bottom .cta-sub {
+      font-size: 14px; color: rgba(255,255,255,0.35); margin-bottom: 32px; line-height: 1.6;
+    }
+
+    /* === FOOTER === */
+    footer {
+      border-top: 0.5px solid rgba(255,255,255,0.06);
+      padding: 28px 48px; display: flex; justify-content: space-between; align-items: center;
+    }
+    .footer-left {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 14px; color: rgba(255,255,255,0.25);
+    }
+    .footer-left .drop1 { width: 8px; height: 11px; }
+    .footer-left .drop2 { width: 6px; height: 9px; }
+    .footer-links { display: flex; gap: 24px; }
+    .footer-links a {
+      font-size: 12px; color: rgba(255,255,255,0.2); text-decoration: none;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: rgba(255,255,255,0.5); }
+
+    /* === SCROLL ANIMATIONS === */
+    .fade-in {
+      opacity: 0; transform: translateY(24px);
+      transition: opacity 0.7s ease, transform 0.7s ease;
+    }
+    .fade-in.visible { opacity: 1; transform: translateY(0); }
+
+    /* === RESPONSIVE === */
+    @media (max-width: 768px) {
+      nav { padding: 0 24px; height: 56px; }
+      .nav-links { display: none; }
+      .mobile-menu-btn { display: flex; }
+      .mobile-nav { top: 56px; }
+      .pricing-hero { padding: 56px 24px 0; }
+      .pricing-grid { grid-template-columns: 1fr; max-width: 400px; }
+      .faq-section { padding-left: 24px; padding-right: 24px; padding-top: 72px; }
+      .cta-bottom { padding: 72px 24px 60px; margin-top: 72px; }
+      footer { padding: 24px; }
+      .section-title { font-size: 24px; }
+    }
+
+    @media (max-width: 480px) {
+      .pricing-card { padding: 28px 20px; }
+      .pricing-price { font-size: 32px; }
+    }
+  </style>
+</head>
+
+<body>
+  <!-- === NAVIGATION === -->
+  <nav id="main-nav">
+    <a href="index.html" class="nav-logo" id="nav-home-logo">
+      <div class="logo-drops">
+        <div class="drop drop1"></div>
+        <div class="drop drop2"></div>
+      </div>
+      Distill
+    </a>
+    <div class="nav-links">
+      <a href="index.html#how-it-works">How it works</a>
+      <a href="index.html#features">Features</a>
+      <a href="pricing.html" class="active">Pricing</a>
+      <a href="demo.html">Demo</a>
+    </div>
+    <button class="mobile-menu-btn" id="mobile-menu-toggle" aria-label="Toggle navigation menu">
+      <span></span><span></span><span></span>
+    </button>
+    <button class="nav-cta" id="nav-add-chrome">Add to Chrome</button>
+  </nav>
+
+  <!-- Mobile navigation overlay -->
+  <div class="mobile-nav" id="mobile-nav">
+    <a href="index.html#how-it-works">How it works</a>
+    <a href="index.html#features">Features</a>
+    <a href="pricing.html">Pricing</a>
+    <a href="demo.html">Demo</a>
+  </div>
+
+  <!-- === PRICING HERO === -->
+  <section class="pricing-hero fade-in">
+    <div class="section-label">Pricing</div>
+    <h1 class="section-title">Simple, honest pricing</h1>
+    <p class="section-sub">Start free with full compression. Upgrade once for power features and API access. No subscriptions, no hidden fees.</p>
+  </section>
+
+  <!-- === PRICING CARDS === -->
+  <section class="pricing-hero fade-in" style="padding-top: 0;">
+    <div class="pricing-grid">
+      <!-- Free Tier -->
+      <div class="pricing-card" id="pricing-free">
+        <div class="pricing-tier">Free</div>
+        <div class="pricing-price">$0 <span class="period">forever</span></div>
+        <div class="pricing-desc">Full prompt compression for everyday use. No limits on messages, no account required.</div>
+        <ul class="pricing-features">
+          <li>
+            <span class="check muted"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2.5 2.5L8 3"/></svg></span>
+            Up to 70% prompt compression
+          </li>
+          <li>
+            <span class="check muted"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2.5 2.5L8 3"/></svg></span>
+            ChatGPT + Claude support
+          </li>
+          <li>
+            <span class="check muted"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2.5 2.5L8 3"/></svg></span>
+            100% on-device processing
+          </li>
+          <li>
+            <span class="check muted"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2.5 2.5L8 3"/></svg></span>
+            Entity-anchored accuracy
+          </li>
+          <li>
+            <span class="check muted"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2.5 2.5L8 3"/></svg></span>
+            Zero configuration
+          </li>
+        </ul>
+        <button class="btn-ghost" id="pricing-free-cta" style="width:100%;text-align:center;">Add to Chrome</button>
+      </div>
+
+      <!-- Pro Tier -->
+      <div class="pricing-card featured" id="pricing-pro">
+        <div class="pricing-badge">Most popular</div>
+        <div class="pricing-tier">Pro</div>
+        <div class="pricing-price">$50 <span class="period">one-time</span></div>
+        <div class="pricing-desc">Unlock advanced compression, usage analytics, and full API access. Pay once, own it forever.</div>
+        <ul class="pricing-features">
+          <li>
+            <span class="check blue"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2.5 2.5L8 3"/></svg></span>
+            Everything in Free
+          </li>
+          <li>
+            <span class="check blue"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2.5 2.5L8 3"/></svg></span>
+            Extended compression models
+          </li>
+          <li>
+            <span class="check blue"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2.5 2.5L8 3"/></svg></span>
+            Usage tracker and analytics
+          </li>
+          <li>
+            <span class="check blue"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2.5 2.5L8 3"/></svg></span>
+            Distill API access
+          </li>
+          <li>
+            <span class="check blue"><svg viewBox="0 0 10 10" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M2 5l2.5 2.5L8 3"/></svg></span>
+            Priority support
+          </li>
+        </ul>
+        <button class="btn-primary" id="pricing-pro-cta" style="width:100%;text-align:center;">Get Pro</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- === FAQ === -->
+  <section class="faq-section fade-in">
+    <div class="section-label">Questions</div>
+    <h2 class="section-title" style="margin-bottom: 32px;">Frequently asked</h2>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        What does "one-time" mean?
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">You pay $50 once and own Pro forever. There are no recurring charges, no monthly fees, and no expiration. Future updates to the Pro tier are included at no extra cost.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Is the free tier actually unlimited?
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">Yes. The free tier includes full prompt compression with no message limits, no time limits, and no account required. It is genuinely free forever.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        What is the Distill API?
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">The Distill API lets you integrate prompt compression into your own applications and workflows. Send prompts via REST API and receive compressed output. Great for developers building on top of LLMs who want to reduce token usage and costs.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        What are extended compression models?
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">Pro unlocks additional, more powerful compression models that can achieve higher compression ratios while maintaining accuracy. These models are optimized for specific domains like technical writing, code, and academic content.</div>
+    </div>
+
+    <div class="faq-item">
+      <div class="faq-q" onclick="this.parentElement.classList.toggle('open')">
+        Can I get a refund?
+        <span class="faq-icon">+</span>
+      </div>
+      <div class="faq-a">Yes. If you are not satisfied with Pro, contact us within 30 days and we will issue a full refund, no questions asked.</div>
+    </div>
+  </section>
+
+  <!-- === BOTTOM CTA === -->
+  <section class="cta-bottom fade-in">
+    <h2>Start compressing for free.</h2>
+    <p class="cta-sub">No credit card required. Install in 10 seconds.</p>
+    <button class="btn-primary" id="cta-add-chrome" style="padding: 15px 32px; font-size: 15px; border-radius: 24px;">Add to Chrome, Free</button>
+  </section>
+
+  <!-- === FOOTER === -->
+  <footer>
+    <div class="footer-left">
+      <div class="logo-drops">
+        <div class="drop drop1"></div>
+        <div class="drop drop2"></div>
+      </div>
+      Distill
+    </div>
+    <div class="footer-links">
+      <a href="#">Privacy</a>
+      <a href="#">GitHub</a>
+      <a href="#">Contact</a>
+    </div>
+  </footer>
+
+  <script>
+    /* == Mobile menu toggle == */
+    const mobileToggle = document.getElementById('mobile-menu-toggle');
+    const mobileNav = document.getElementById('mobile-nav');
+
+    mobileToggle.addEventListener('click', () => {
+      mobileToggle.classList.toggle('active');
+      mobileNav.classList.toggle('open');
+    });
+
+    document.querySelectorAll('.mobile-nav a').forEach(link => {
+      link.addEventListener('click', () => {
+        mobileToggle.classList.remove('active');
+        mobileNav.classList.remove('open');
+      });
+    });
+
+    /* == Scroll-triggered fade-in == */
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        if (entry.isIntersecting) entry.target.classList.add('visible');
+      });
+    }, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+  </script>
+</body>
+</html>
